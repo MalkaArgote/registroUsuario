@@ -1,3 +1,34 @@
+// Valida los datos de registro y devuelve una lista de errores
+function validarRegistro(datos) {
+  const errores = [];
+
+  // Si no llegó ningún cuerpo, no hay nada que revisar
+  if (!datos || typeof datos !== "object") {
+    return ["El cuerpo de la petición debe ser un JSON válido"];
+  }
+
+  const { nombre, apellido, correo, contrasena } = datos;
+
+  if (typeof nombre !== "string" || nombre.trim() === "") {
+    errores.push("El nombre es obligatorio");
+  }
+
+  if (typeof apellido !== "string" || apellido.trim() === "") {
+    errores.push("El apellido es obligatorio");
+  }
+
+  const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (typeof correo !== "string" || !formatoCorreo.test(correo.trim())) {
+    errores.push("El correo es obligatorio y debe tener un formato válido");
+  }
+
+  if (typeof contrasena !== "string" || contrasena.length < 8) {
+    errores.push("La contraseña es obligatoria y debe tener mínimo 8 caracteres");
+  }
+
+  return errores;
+}
+
 const express = require("express");
 
 const app = express();
@@ -18,12 +49,16 @@ app.listen(PUERTO, () => {
 
 // Ruta: POST /register
 app.post("/register", (req, res) => {
-  const { nombre, apellido, correo, contrasena } = req.body;
+  const errores = validarRegistro(req.body);
 
-  console.log("Datos recibidos:", { nombre, apellido, correo });
+  if (errores.length > 0) {
+    return res.status(400).json({ errores });
+  }
+
+  const { nombre, apellido, correo } = req.body;
 
   res.status(201).json({
-    mensaje: "Datos recibidos",
+    mensaje: "Datos válidos",
     usuario: { nombre, apellido, correo },
   });
 });

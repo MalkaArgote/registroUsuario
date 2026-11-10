@@ -15,3 +15,15 @@ app.get("/", (req, res) => {
 app.listen(PUERTO, () => {
   console.log(`Servidor escuchando en http://localhost:${PUERTO}`);
 });
+
+// Ruta: POST /register
+app.post("/register", (req, res) => {
+  const { nombre, apellido, correo, contrasena } = req.body;
+
+  console.log("Datos recibidos:", { nombre, apellido, correo });
+
+  res.status(201).json({
+    mensaje: "Datos recibidos",
+    usuario: { nombre, apellido, correo },
+  });
+});

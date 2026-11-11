@@ -30,6 +30,7 @@ function validarRegistro(datos) {
 }
 
 const express = require("express");
+const bcrypt = require("bcrypt");
 
 const app = express();
 const PUERTO = 3000;
@@ -48,17 +49,27 @@ app.listen(PUERTO, () => {
 });
 
 // Ruta: POST /register
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
   const errores = validarRegistro(req.body);
 
   if (errores.length > 0) {
     return res.status(400).json({ errores });
   }
 
-  const { nombre, apellido, correo } = req.body;
+  const { nombre, apellido, correo, contrasena } = req.body;
 
-  res.status(201).json({
-    mensaje: "Datos válidos",
-    usuario: { nombre, apellido, correo },
-  });
+  try {
+    const contrasenaHash = await bcrypt.hash(contrasena, 10);
+
+    // Solo para estudiar: en una app real NUNCA imprimas hashes
+    console.log("Hash generado:", contrasenaHash);
+
+    res.status(201).json({
+      mensaje: "Usuario procesado",
+      usuario: { nombre, apellido, correo },
+    });
+  } catch (error) {
+    console.error("Error al procesar el registro:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
 });
